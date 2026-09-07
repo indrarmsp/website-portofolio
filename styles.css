@@ -1,0 +1,131 @@
+/* Custom styles for monochrome developer portfolio */
+
+:root {
+  --color-ink: #0a0a0a;
+  --color-surface: #121212;
+  --color-elevated: #1a1a1a;
+  --color-border: #272727;
+  --color-border-light: #383838;
+  --color-muted: #a3a3a3;
+  --color-subtle: #737373;
+  --color-text-main: #ffffff;
+  color-scheme: dark;
+}
+
+html.light {
+  --color-ink: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-elevated: #f1f3f5;
+  --color-border: #e2e4e8;
+  --color-border-light: #cbd0d6;
+  --color-muted: #4b5563;
+  --color-subtle: #6b7280;
+  --color-text-main: #0f1115;
+  color-scheme: light;
+}
+
+/* Smooth background transitions on theme switch */
+body, header, nav, section, footer, article, div, a, button {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* Keyboard accessibility outline */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-text-main);
+  outline-offset: 2px;
+}
+
+/* Project card micro-elevation & subtle transition */
+.project-card {
+  will-change: transform, border-color, box-shadow;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              box-shadow 0.25s ease,
+              background-color 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-light);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.12);
+}
+
+html.dark .project-card:hover {
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* About card micro-interaction */
+.about-card {
+  will-change: transform, border-color;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.2s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-light);
+}
+
+/* Skill badges */
+.skill-badge {
+  transition: transform 0.2s ease,
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+}
+
+.skill-badge:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-border-light);
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-card {
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
