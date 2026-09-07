@@ -6,14 +6,6 @@ Built using native web standards with zero compilation or build tooling required
 
 ---
 
-## Live Links & Profile
-
-- **Live Site:** [https://indrarmsp.github.io/website-portofolio/](https://indrarmsp.github.io/website-portofolio/)
-- **GitHub Profile:** [https://github.com/indrarmsp](https://github.com/indrarmsp)
-- **LinkedIn:** [https://linkedin.com/in/indrarms](https://linkedin.com/in/indrarms)
-
----
-
 ## Key Features
 
 - **Dynamic GitHub REST API Integration:** Automatically retrieves and displays public repositories (excluding forks) with language badges, stars, and forks, along with live profile statistics.
