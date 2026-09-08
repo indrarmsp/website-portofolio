@@ -78,14 +78,12 @@ html.dark .project-card:hover {
 
 /* About card micro-interaction */
 .about-card {
-  will-change: transform, border-color;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.25s ease,
+  will-change: border-color;
+  transition: border-color 0.25s ease,
               background-color 0.2s ease;
 }
 
 .about-card:hover {
-  transform: translateY(-2px);
   border-color: var(--color-border-light);
 }
 

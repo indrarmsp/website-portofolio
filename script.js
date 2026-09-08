@@ -157,6 +157,7 @@ function initEntranceAnimations() {
       duration: 0.6,
       stagger: 0.1,
       ease: 'power2.out',
+      clearProps: 'all',
     });
 
     // Technical skills categories
@@ -170,6 +171,7 @@ function initEntranceAnimations() {
       duration: 0.6,
       stagger: 0.12,
       ease: 'power2.out',
+      clearProps: 'all',
     });
 
     // GitHub stats cards
@@ -183,6 +185,7 @@ function initEntranceAnimations() {
       duration: 0.5,
       stagger: 0.08,
       ease: 'power2.out',
+      clearProps: 'all',
     });
   }
 }
@@ -427,6 +430,7 @@ function renderRepoCards(repos, container) {
       duration: 0.5,
       stagger: 0.08,
       ease: 'power2.out',
+      clearProps: 'all',
     });
 
     if (typeof ScrollTrigger !== 'undefined') {
