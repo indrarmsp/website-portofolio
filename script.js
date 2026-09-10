@@ -145,49 +145,46 @@ function initEntranceAnimations() {
     ease: 'power3.out',
   });
 
-  // About cards reveal
+  // Scroll reveal cards
   if (typeof ScrollTrigger !== 'undefined') {
-    gsap.from('.about-card', {
-      scrollTrigger: {
-        trigger: '#about',
-        start: 'top 80%',
-      },
-      opacity: 0,
-      y: 20,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out',
-      clearProps: 'all',
-    });
+    const scrollAnimations = [
+      { selector: '.about-card', trigger: '#about', start: 'top 80%', stagger: 0.1 },
+      { selector: '.skill-category', trigger: '#skills', start: 'top 80%', stagger: 0.12 },
+      { selector: '.stat-card', trigger: '#metrics', start: 'top 85%', y: 15, duration: 0.5, stagger: 0.08 }
+    ];
 
-    // Technical skills categories
-    gsap.from('.skill-category', {
-      scrollTrigger: {
-        trigger: '#skills',
-        start: 'top 80%',
-      },
-      opacity: 0,
-      y: 20,
-      duration: 0.6,
-      stagger: 0.12,
-      ease: 'power2.out',
-      clearProps: 'all',
-    });
-
-    // GitHub stats cards
-    gsap.from('.stat-card', {
-      scrollTrigger: {
-        trigger: '#metrics',
-        start: 'top 85%',
-      },
-      opacity: 0,
-      y: 15,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: 'power2.out',
-      clearProps: 'all',
+    scrollAnimations.forEach(({ selector, trigger, start, y = 20, duration = 0.6, stagger }) => {
+      gsap.from(selector, {
+        scrollTrigger: { trigger, start },
+        opacity: 0,
+        y,
+        duration,
+        stagger,
+        ease: 'power2.out',
+        clearProps: 'all',
+      });
     });
   }
+}
+
+/**
+ * Helper to fetch data from GitHub API
+ */
+async function fetchGitHubData(url) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('GitHub API rate limit exceeded.');
+    }
+    throw new Error(`HTTP Error ${response.status}`);
+  }
+
+  return response.json();
 }
 
 /**
@@ -199,17 +196,7 @@ async function fetchGitHubProfile() {
   const followingEl = document.getElementById('stat-following');
 
   try {
-    const response = await fetch(GITHUB_API_URL, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Profile fetch failed: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await fetchGitHubData(GITHUB_API_URL);
 
     if (reposEl) reposEl.textContent = Number(data.public_repos || 0).toLocaleString();
     if (followersEl) followersEl.textContent = Number(data.followers || 0).toLocaleString();
@@ -233,21 +220,8 @@ async function fetchGitHubRepos() {
   const footerCta = document.getElementById('projects-footer');
 
   try {
-    const url = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&direction=desc&per_page=100`;
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error('GitHub API rate limit exceeded. Please view repositories directly on GitHub.');
-      }
-      throw new Error(`Unable to load repositories (HTTP ${response.status}).`);
-    }
-
-    const repos = await response.json();
+    const url = `${GITHUB_API_URL}/repos?sort=updated&direction=desc&per_page=100`;
+    const repos = await fetchGitHubData(url);
 
     if (!Array.isArray(repos)) {
       throw new Error('Unexpected data received from GitHub.');
@@ -295,8 +269,34 @@ function showErrorState(container, errorBox, errorMsg, message) {
 }
 
 /**
+ * Helper to dynamically create DOM elements
+ */
+function el(tag, attributes = {}, ...children) {
+  const element = document.createElement(tag);
+  
+  for (const [key, value] of Object.entries(attributes)) {
+    if (key === 'className') {
+      element.className = value;
+    } else if (key === 'textContent') {
+      element.textContent = value;
+    } else if (value !== undefined) {
+      element.setAttribute(key, value);
+    }
+  }
+
+  children.forEach(child => {
+    if (typeof child === 'string' || typeof child === 'number') {
+      element.appendChild(document.createTextNode(child.toString()));
+    } else if (child instanceof Node) {
+      element.appendChild(child);
+    }
+  });
+
+  return element;
+}
+
+/**
  * Render Project Cards using secure DOM manipulation
- * (Avoids raw innerHTML injection of untrusted user data)
  */
 function renderRepoCards(repos, container) {
   if (!container) return;
@@ -306,114 +306,54 @@ function renderRepoCards(repos, container) {
 
   repos.forEach((repo) => {
     // Top-level card wrapper
-    const card = document.createElement('article');
-    card.className =
-      'project-card p-6 rounded-xl bg-surface border border-border flex flex-col justify-between group';
-
-    // Top section: Repo title & link
-    const topDiv = document.createElement('div');
-
-    const headerRow = document.createElement('div');
-    headerRow.className = 'flex items-start justify-between gap-2 mb-2';
-
-    const titleContainer = document.createElement('div');
-    titleContainer.className = 'flex items-center gap-2 overflow-hidden';
-
-    // Folder Icon
-    const folderIcon = document.createElement('i');
-    folderIcon.setAttribute('data-lucide', 'folder-code');
-    folderIcon.className = 'w-4 h-4 text-muted shrink-0';
-    titleContainer.appendChild(folderIcon);
-
-    const titleLink = document.createElement('a');
-    titleLink.href = repo.html_url;
-    titleLink.target = '_blank';
-    titleLink.rel = 'noopener noreferrer';
-    titleLink.className =
-      'text-base font-bold font-mono text-text-main group-hover:text-muted transition-colors truncate focus:outline-none focus-visible:ring-1 focus-visible:ring-current rounded';
-    titleLink.textContent = repo.name;
-    titleContainer.appendChild(titleLink);
-
-    headerRow.appendChild(titleContainer);
-
-    const extLink = document.createElement('a');
-    extLink.href = repo.html_url;
-    extLink.target = '_blank';
-    extLink.rel = 'noopener noreferrer';
-    extLink.setAttribute('aria-label', `Visit ${repo.name} repository on GitHub`);
-    extLink.className =
-      'text-muted hover:text-text-main p-1 rounded hover:bg-elevated transition-colors shrink-0';
-
-    const extIcon = document.createElement('i');
-    extIcon.setAttribute('data-lucide', 'arrow-up-right');
-    extIcon.className = 'w-4 h-4';
-    extLink.appendChild(extIcon);
-
-    headerRow.appendChild(extLink);
-    topDiv.appendChild(headerRow);
-
-    // Repo Description
-    const desc = document.createElement('p');
-    desc.className = 'text-xs sm:text-sm text-muted line-clamp-3 leading-relaxed mb-4';
-    desc.textContent = repo.description || 'No description provided for this repository.';
-    topDiv.appendChild(desc);
-
-    card.appendChild(topDiv);
-
-    // Bottom section: Metadata (Language, Stars, Forks, Updated Date)
-    const bottomDiv = document.createElement('div');
-    bottomDiv.className = 'pt-4 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs text-muted';
-
-    // Left: Language badge
-    const leftMeta = document.createElement('div');
-    leftMeta.className = 'flex items-center gap-2';
-
-    const langBadge = document.createElement('span');
-    langBadge.className =
-      'inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-elevated border border-border text-text-main';
-
-    const langDot = document.createElement('span');
-    langDot.className = 'w-1.5 h-1.5 rounded-full bg-subtle';
-    langBadge.appendChild(langDot);
-
-    const langText = document.createTextNode(repo.language || 'Plain Text');
-    langBadge.appendChild(langText);
-
-    leftMeta.appendChild(langBadge);
-    bottomDiv.appendChild(leftMeta);
-
-    // Right: Stars & Forks count + Updated
-    const rightMeta = document.createElement('div');
-    rightMeta.className = 'flex items-center gap-3 font-mono text-[11px]';
-
-    // Stars
-    const starSpan = document.createElement('span');
-    starSpan.className = 'flex items-center gap-1 text-muted hover:text-text-main transition-colors';
-    const starIcon = document.createElement('i');
-    starIcon.setAttribute('data-lucide', 'star');
-    starIcon.className = 'w-3.5 h-3.5';
-    starSpan.appendChild(starIcon);
-    starSpan.appendChild(document.createTextNode(repo.stargazers_count.toString()));
-    rightMeta.appendChild(starSpan);
-
-    // Forks
-    const forkSpan = document.createElement('span');
-    forkSpan.className = 'flex items-center gap-1 text-muted hover:text-text-main transition-colors';
-    const forkIcon = document.createElement('i');
-    forkIcon.setAttribute('data-lucide', 'git-fork');
-    forkIcon.className = 'w-3.5 h-3.5';
-    forkSpan.appendChild(forkIcon);
-    forkSpan.appendChild(document.createTextNode(repo.forks_count.toString()));
-    rightMeta.appendChild(forkSpan);
-
-    // Updated date
-    const updatedSpan = document.createElement('span');
-    updatedSpan.className = 'text-subtle hidden sm:inline';
-    updatedSpan.textContent = formatDate(repo.updated_at);
-    rightMeta.appendChild(updatedSpan);
-
-    bottomDiv.appendChild(rightMeta);
-    card.appendChild(bottomDiv);
+    const card = el('article', { className: 'project-card p-6 rounded-xl bg-surface border border-border flex flex-col justify-between group' },
+      el('div', {},
+        el('div', { className: 'flex items-start justify-between gap-2 mb-2' },
+          el('div', { className: 'flex items-center gap-2 overflow-hidden' },
+            el('i', { 'data-lucide': 'folder-code', className: 'w-4 h-4 text-muted shrink-0' }),
+            el('a', {
+              href: repo.html_url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              className: 'text-base font-bold font-mono text-text-main group-hover:text-muted transition-colors truncate focus:outline-none focus-visible:ring-1 focus-visible:ring-current rounded',
+              textContent: repo.name
+            })
+          ),
+          el('a', {
+            href: repo.html_url,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            'aria-label': `Visit ${repo.name} repository on GitHub`,
+            className: 'text-muted hover:text-text-main p-1 rounded hover:bg-elevated transition-colors shrink-0'
+          },
+            el('i', { 'data-lucide': 'arrow-up-right', className: 'w-4 h-4' })
+          )
+        ),
+        el('p', {
+          className: 'text-xs sm:text-sm text-muted line-clamp-3 leading-relaxed mb-4',
+          textContent: repo.description || 'No description provided for this repository.'
+        })
+      ),
+      el('div', { className: 'pt-4 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs text-muted' },
+        el('div', { className: 'flex items-center gap-2' },
+          el('span', { className: 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-elevated border border-border text-text-main' },
+            el('span', { className: 'w-1.5 h-1.5 rounded-full bg-subtle' }),
+            repo.language || 'Plain Text'
+          )
+        ),
+        el('div', { className: 'flex items-center gap-3 font-mono text-[11px]' },
+          el('span', { className: 'flex items-center gap-1 text-muted hover:text-text-main transition-colors' },
+            el('i', { 'data-lucide': 'star', className: 'w-3.5 h-3.5' }),
+            repo.stargazers_count
+          ),
+          el('span', { className: 'flex items-center gap-1 text-muted hover:text-text-main transition-colors' },
+            el('i', { 'data-lucide': 'git-fork', className: 'w-3.5 h-3.5' }),
+            repo.forks_count
+          ),
+          el('span', { className: 'text-subtle hidden sm:inline', textContent: formatDate(repo.updated_at) })
+        )
+      )
+    );
 
     container.appendChild(card);
   });
