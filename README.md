@@ -6,7 +6,7 @@ This application is a modern and minimalist (monochrome) personal portfolio webs
 
 ## Architecture & File Structure
 
-This application uses a traditional **Static Site / Single Page Application (SPA)** architecture with a clear *Separation of Concerns* between UI structure, styling, and page logic.
+This application uses a traditional **Static Site / Single Page Application (SPA)** architecture with a strict adherence to the **DRY (Don't Repeat Yourself)** principle and a clear *Separation of Concerns* between UI structure, styling, and page logic.
 
 ```text
 website-portofolio/
@@ -14,9 +14,9 @@ website-portofolio/
 │   ├── favicon.ico         # Favicon for legacy browsers
 │   ├── favicon.png         # Raster icon for modern devices & Apple
 │   └── favicon.svg         # SVG vector favicon (Terminal prompt icon)
-├── index.html              # Main UI entry point containing semantic HTML structure
+├── index.html              # Main UI entry point containing semantic HTML and SVG Sprites for optimized rendering
 ├── styles.css              # Custom styling (theme color variables, micro-interactions)
-├── script.js               # Application logic (Dark mode, GSAP Animation, GitHub Fetch API)
+├── script.js               # Application logic (Dark mode, GSAP Animations, GitHub API Fetch, and a custom DOM creation helper)
 ├── .gitignore              # Git ignore rules
 ├── .nojekyll               # Bypass file for GitHub Pages to read dot files
 └── README.md               # Main project documentation
@@ -26,12 +26,12 @@ website-portofolio/
 
 ## API Integration (Public)
 
-This project integrates directly and dynamically with the **GitHub REST API (Public)** on the client-side without any internal backend intermediaries. There are 2 main endpoints utilized in `script.js`:
+This project integrates directly and dynamically with the **GitHub REST API (Public)** on the client-side without any internal backend intermediaries. There are 2 main endpoints utilized, wrapped securely within an asynchronous data fetching helper in `script.js`:
 
 1. **GitHub Profile API** (`GET https://api.github.com/users/{username}`)
    Fetches live statistical data related to the user, such as the total number of *Public Repositories*, *Followers*, and *Following*.
 2. **GitHub Repositories API** (`GET https://api.github.com/users/{username}/repos`)
-   Fetches a list of all public repositories belonging to the user, sorted by the latest updates. The code filters out (hides) *forked* repositories and dynamically renders project cards complete with language icons, *star* counts, and *fork* counts.
+   Fetches a list of all public repositories belonging to the user, sorted by the latest updates. The code filters out (hides) *forked* repositories and dynamically renders project cards complete with language badges, *star* counts, and *fork* counts using a declarative DOM creation function.
 
 ---
 
@@ -44,16 +44,16 @@ This application is purely frontend (Static) and *stateless*. All static data (e
 
 ## Technology Stack & Libraries
 
-This project is built using standard **Vanilla Web Technologies** empowered by third-party CDN-based libraries for development efficiency.
+This project is built using standard **Vanilla Web Technologies** empowered by third-party CDN-based libraries for development efficiency, while maintaining a highly optimized footprint.
 
 **Core Technologies:**
-- Semantic **HTML5** & Meta/OpenGraph tags
+- Semantic **HTML5**, Meta/OpenGraph tags, and inline **SVG Sprites**
 - **CSS3** (Custom `color-scheme` variables and transitions)
-- **JavaScript ES6+** (Secure DOM Manipulation & Asynchronous Fetch API)
+- **JavaScript ES6+** (Modularized Functions, Secure DOM Manipulation Helper, & Asynchronous Fetch API)
 
 **Helper Libraries (via CDN):**
 - **[Tailwind CSS](https://tailwindcss.com/):** A utility-first framework for rapidly building responsive layouts without writing external CSS classes manually.
-- **[GSAP (GreenSock Animation Platform) & ScrollTrigger](https://gsap.com/):** An animation engine used to create professional and smooth *scroll-reveal* entrance effects (such as *fade-in* / *slide-up*) as the user scrolls.
+- **[GSAP (GreenSock Animation Platform) & ScrollTrigger](https://gsap.com/):** An animation engine used to create professional and smooth *scroll-reveal* entrance effects (such as *fade-in* / *slide-up*) as the user scrolls, controlled by loop configurations.
 - **[Lucide Icons](https://lucide.dev/):** A minimalist and modern SVG-based icon library (*script-based* injection).
 - Google Fonts: **Inter** (primary text) and **JetBrains Mono** (code/numbers text).
 
@@ -77,7 +77,7 @@ Since this is not an NPM / Node.js *heavy-build* project, setup is instant and r
 
 ## How to Run the Application
 
-It is recommended to run this application using a basic Local Web Server to prevent CORS blocking from modern browser security policies regarding static files (such as fetching external scripts).
+It is recommended to run this application using a basic Local Web Server to prevent CORS blocking from modern browser security policies regarding static files (such as fetching external scripts or API interactions).
 
 Choose one of the following methods:
 
@@ -102,7 +102,7 @@ npx http-server -p 8000
 
 ## How to Test the Application
 
-All testing and debugging focus on the client-side UI/UX and interactions. Use the **Developer Tools (F12)** in your browser to test the following aspects:
+All testing and debugging focus on the client-side UI/UX, interactions, and modular functions. Use the **Developer Tools (F12)** in your browser to test the following aspects:
 
 1. **Layout Responsiveness Testing:** Enable the **Device Toolbar** in Developer Tools and switch the dimensions to Mobile (iPhone, etc.), Tablet, and wide Desktop views to ensure the UI adapts correctly (Tailwind breakpoints).
 2. **Animation Testing (GSAP):**
